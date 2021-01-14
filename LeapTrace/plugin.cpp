@@ -18,24 +18,24 @@ duint Leap(bool (*predicate)())
     char traceexecute[32];
     bool usetraceexecute;
     if (!DbgGetRegDumpEx(&regdump, sizeof(regdump)))
-        return false;
+        return 0; //???
     cip = regdump.regcontext.cip;
     if (!DbgMemRead(cip, data, buffersize))
-        return false;
+        return cip;
     
     // First instruction
     if (!dis.Disassemble(cip, data, 16))
-        return true;
+        return cip;
     if (!dis.IsNop() && (predicate() || dis.IsInt3() || dis.IsRet() || dis.IsUnusual()))
     {
         if (dis.IsInt3())
-            return true;
+            return cip;
         // We are at a branch instruction, probably we have leaped previously, so we skip to destination and continue there.
         if (dis.IsBranchGoingToExecute(regdump.regcontext.eflags, regdump.regcontext.ccx))
         {
             cip = DbgGetBranchDestination(cip);
             if (!DbgMemRead(cip, data, buffersize))
-                return false;
+                return cip;
         }
         else
             offset = dis.GetInstr()->length;
