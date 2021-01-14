@@ -156,7 +156,7 @@ void cbBreakpoint(CBTYPE callbacktype, void* userinfo)
             {
                 bool ok;
                 duint cond = DbgEval(tracecondition, &ok);
-                if (cond == 0)
+                if (ok && cond == 0)
                 {
                     tracecount++;
                     if (tracecount < maxcount)
