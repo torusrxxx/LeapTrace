@@ -80,6 +80,9 @@ bool LeapToward(duint addr)
         sprintf_s(cmd, "SetHardwareBreakpointSingleshoot %p, 1", addr);
         if (!DbgCmdExecDirect(cmd))
             return false;
+        sprintf_s(cmd, "SetHardwareBreakpointSilent %p, 1", addr);
+        if (!DbgCmdExecDirect(cmd))
+            return false;
         return DbgCmdExecDirect("run");
     }
     else
@@ -114,7 +117,7 @@ bool cbLeapConditional(int argc, char* argv[], bool(*predicate)())
 {
     if (argc < 2)
     {
-        _plugin_logputs("A contition expression must be provided. When the expression is evaluated to 1 tracing is stopped. If you want to trace continuously use 0. It is recommended that you use memory rather than register in the expression, because the expression is only evaluated when a conditional instruction is executed.");
+        _plugin_logputs("[LeapTrace] A contition expression must be provided. When the expression is evaluated to 1 tracing is stopped. If you want to trace continuously use 0. It is recommended that you use memory rather than register in the expression, because the expression is only evaluated when a conditional instruction is executed.");
         return false;
     }
     if (tracecondition != NULL)
@@ -128,7 +131,7 @@ bool cbLeapConditional(int argc, char* argv[], bool(*predicate)())
         maxcount = DbgEval(argv[2], &ok);
         if (maxcount <= 0 || !ok)
         {
-            _plugin_logputs("The 2nd argument (max trace count) is invalid.");
+            _plugin_logputs("[LeapTrace] The 2nd argument (max trace count) is invalid.");
             return false;
         }
     }
@@ -171,7 +174,7 @@ void cbBreakpoint(CBTYPE callbacktype, void* userinfo)
                 else
                 {
 TraceStopped:
-                    _plugin_logprintf("Traced %d steps.", tracecount);
+                    _plugin_logprintf("[LeapTrace] Traced %d steps.\n", tracecount);
                     free(tracecondition);
                     tracecondition = NULL;
                     tracepredicate = NULL;
